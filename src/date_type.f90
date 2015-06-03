@@ -10,11 +10,7 @@ module date_type
 
   ! public functions:
   public :: now
-  public :: to_string_day
-  public :: to_string_hour
-  public :: to_string_minute
-  public :: to_string_month
-  public :: to_string_year
+  public :: count_character_reps
 
   ! parameters:
   integer, parameter :: LK = 4
@@ -23,13 +19,9 @@ module date_type
   character(*), parameter :: MONTH_NAMES(*) = ['January  ','February ','March    ', &
            'April    ','May      ','June     ','July     ','August   ','September', &
            'October  ','Noveber  ','December ']
-  integer, parameter :: MONTH_NAME_LENS(*) = [7,8,5,5,3,4,4,6,9,7,7,8]
-  ! local parameters:
+  integer(IK), parameter :: MONTH_NAME_LENS(*) = [7,8,5,5,3,4,4,6,9,7,7,8]
   integer(IK), parameter :: DAYS_TO_MONTH_REGULAR(12) = [0,31,59,90,120,151,181,212,243,273,304,334]
   integer(IK), parameter :: DAYS_TO_MONTH_LEAP_YEAR(12) = [0,31,60,91,121,152,182,213,244,274,305,335]
-  ! local parameters:
-  integer(IK), parameter :: DAYS_IN_MONTH_REGULAR(12) = [31,28,31,30,31,30,31,31,30,31,30,31]
-  integer(IK), parameter :: DAYS_IN_MONTH_LEAP_YEAR(12) = [31,29,31,30,31,30,31,31,30,31,30,31]
 
   ! derived types:
   type date
@@ -37,6 +29,7 @@ module date_type
     integer(IK) :: year_
     integer(IK) :: month_
     integer(IK) :: day_of_month_
+    integer(IK) :: day_of_week_
     integer(IK) :: day_of_year_
     integer(IK) :: hour_
     integer(IK) :: minute_
@@ -45,7 +38,7 @@ module date_type
   contains
     ! get functions:
     procedure :: dayOfMonth => date_return_day_of_month
-    !procedure :: dayOfWeek => date_return_day_of_week
+    procedure :: dayOfWeek => date_return_day_of_week
     procedure :: dayOfYear => date_return_day_of_year
     procedure :: hour => date_return_hour
     procedure :: milisecond => date_return_milisecond
@@ -54,7 +47,7 @@ module date_type
     procedure :: year => date_return_year
     ! get subroutines:
     procedure :: getDayOfMonth => date_get_day_of_month
-    !procedure :: getDayOfWeek => date_get_day_of_week
+    procedure :: getDayOfWeek => date_get_day_of_week
     procedure :: getDayOfYear => date_get_day_of_year
     procedure :: getHour => date_get_hour
     procedure :: getMilisecond => date_get_milisecond
@@ -100,6 +93,7 @@ contains
     LHS%year_         = RHS%year_
     LHS%month_        = RHS%month_
     LHS%day_of_month_ = RHS%day_of_month_
+    LHS%day_of_week_  = RHS%day_of_week_
     LHS%day_of_year_  = RHS%day_of_year_
     LHS%hour_         = RHS%hour_
     LHS%minute_       = RHS%minute_
@@ -128,6 +122,7 @@ contains
     d%year_         = year
     d%month_        = month
     d%day_of_month_ = day
+    d%day_of_week_  = day_of_week(year, month, day)
     d%day_of_year_  = days_to_month(month, year) + day
     d%hour_         = hour
     d%minute_       = minute
@@ -148,6 +143,20 @@ contains
 
     day = self%day_of_month_
   end subroutine date_get_day_of_month
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_get_day_of_week:
+!
+!    Gets the day of the week for this type(date).
+!
+  pure subroutine date_get_day_of_week( self, day )
+    class(date), intent(in)  :: self
+    integer(IK), intent(out) :: day
+
+    day = self%day_of_week_
+  end subroutine date_get_day_of_week
 !=========================================================================================
 
 
@@ -260,15 +269,7 @@ contains
     integer(IK) :: values(8)
 
     call date_and_time(values=values)
-
-    d%year_         = values(1)
-    d%month_        = values(2)
-    d%day_of_month_ = values(3)
-    d%day_of_year_  = days_to_month(d%month_, d%year_) + d%day_of_month_
-    d%hour_         = values(5)
-    d%minute_       = values(6)
-    d%second_       = values(7)
-    d%milisecond_   = values(8)
+    d = date(values(1), values(2), values(3), values(5), values(6), values(7), values(8))
   end function date_now
 !=========================================================================================
 
@@ -276,7 +277,7 @@ contains
 !=========================================================================================
 !  date_return_day_of_month:
 !
-!    Returns the day of the year for this type(date).
+!    Returns the day of the month for this type(date).
 !
   pure function date_return_day_of_month( self ) result( day )
     class(date), intent(in)  :: self
@@ -284,6 +285,20 @@ contains
 
     day = self%day_of_month_
   end function date_return_day_of_month
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_return_day_of_week:
+!
+!    Returns the day of the week for this type(date).
+!
+  pure function date_return_day_of_week( self ) result( day )
+    class(date), intent(in)  :: self
+    integer(IK) :: day
+
+    day = self%day_of_week_
+  end function date_return_day_of_week
 !=========================================================================================
 
 
@@ -525,25 +540,6 @@ contains
 
 
 !=========================================================================================
-!  days_in_month:
-!
-!    Returns the number of days in the given month for the given year.
-!
-  elemental function days_in_month( month, year ) result( days )
-    integer(IK), intent(in) :: month
-    integer(IK), intent(in) :: year
-    integer(IK) :: days
-
-    if (is_leap_year(year)) then
-      days = DAYS_IN_MONTH_LEAP_YEAR(month)
-    else
-      days = DAYS_IN_MONTH_REGULAR(month)
-    end if
-  end function days_in_month
-!=========================================================================================
-
-
-!=========================================================================================
 !  convert_day_of_year_to_day_of_month:
 !
 !    Returns the number of the month the given day of year belongs to.
@@ -579,6 +575,36 @@ contains
       end do
     end if
   end function convert_day_of_year_to_month
+!=========================================================================================
+
+
+!=========================================================================================
+!  day_of_week:
+!
+!    Returns the day of the week for a given year, month, and day of the month.
+!
+  pure function day_of_week(year, month, day_of_month) result( day )
+    integer(IK), intent(in) :: year
+    integer(IK), intent(in) :: month
+    integer(IK), intent(in) :: day_of_month
+    integer(IK) :: day
+    ! local parameters:
+    integer(IK), parameter :: MONTH_NUMBER_REGULAR(12) = [0,3,3,6,1,4,6,2,5,0,3,5]
+    integer(IK), parameter :: MONTH_NUMBER_LEAP_YEAR(12) = [6,2,3,6,1,4,6,2,5,0,3,5]
+    ! local variables:
+    integer(IK) :: century
+    integer(IK) :: month_number
+    integer(IK) :: year_number
+
+    century = year/100
+    year_number = mod(year, 100)
+    if (is_leap_year(year)) then
+      month_number = MONTH_NUMBER_LEAP_YEAR(month)
+    else
+      month_number = MONTH_NUMBER_REGULAR(month)
+    end if
+    day = mod(day_of_month + month_number + year_number + year_number/4 + century, 7)
+  end function day_of_week
 !=========================================================================================
 
 
@@ -626,6 +652,28 @@ contains
     ! apply sign if second_year comes before first_year
     if (first_year > second_year) days = -days
   end function days_between_years
+!=========================================================================================
+
+
+!=========================================================================================
+!  days_in_month:
+!
+!    Returns the number of days in the given month for the given year.
+!
+  elemental function days_in_month( month, year ) result( days )
+    integer(IK), intent(in) :: month
+    integer(IK), intent(in) :: year
+    integer(IK) :: days
+    ! local parameters:
+    integer(IK), parameter :: DAYS_IN_MONTH_REGULAR(12) = [31,28,31,30,31,30,31,31,30,31,30,31]
+    integer(IK), parameter :: DAYS_IN_MONTH_LEAP_YEAR(12) = [31,29,31,30,31,30,31,31,30,31,30,31]
+
+    if (is_leap_year(year)) then
+      days = DAYS_IN_MONTH_LEAP_YEAR(month)
+    else
+      days = DAYS_IN_MONTH_REGULAR(month)
+    end if
+  end function days_in_month
 !=========================================================================================
 
 
@@ -723,10 +771,10 @@ contains
         str = str//c
       case('d')
         n = count_character_reps(fmt(i:), 'd')
-        str = str//to_string_day(self%day_of_month_, n)
+        str = str//to_string_day_of_month(self%day_of_month_, n)
       case('D')
         n = count_character_reps(fmt(i:), 'D')
-        str = str//to_string_day(self%day_of_year_, n)
+        str = str//to_string_day_of_year(self%day_of_year_, n)
       case('H')
         n = count_character_reps(fmt(i:), 'H')
         str = str//to_string_hour(self%hour_, n)
@@ -738,10 +786,10 @@ contains
         str = str//to_string_minute(self%minute_, n)
       case('S')
         n = count_character_reps(fmt(i:), 'S')
-        str = str//to_string_minute(self%milisecond_, n)
+        str = str//to_string_milisecond(self%milisecond_, n)
       case('s')
         n = count_character_reps(fmt(i:), 's')
-        str = str//to_string_minute(self%second_, n)
+        str = str//to_string_second(self%second_, n)
       case('y')
         n = count_character_reps(fmt(i:), 'y')
         str = str//to_string_year(self%year_, n)
@@ -753,26 +801,39 @@ contains
 
 
 !=========================================================================================
-!  to_string_day:
+!  to_string_day_of_month:
 !
-!    Converts the month number to a string, either a numeric representation if N <= 2
-!    or a character representation if N > 2.
+!    Converts the day of month number to a string.
 !
-  function to_string_day( day, n ) result( str )
+  function to_string_day_of_month( day, n ) result( str )
+    integer(IK) , intent(in)  :: day
+    integer(IK) , intent(in)  :: n
+    character(:), allocatable :: str
+
+    str = to_string_int(day, max(2, n), n)
+  end function to_string_day_of_month
+!=========================================================================================
+
+
+!=========================================================================================
+!  to_string_day_of_year:
+!
+!    Converts the day of the year number to a string.
+!
+  function to_string_day_of_year( day, n ) result( str )
     integer(IK) , intent(in)  :: day
     integer(IK) , intent(in)  :: n
     character(:), allocatable :: str
 
     str = to_string_int(day, max(3, n), n)
-  end function to_string_day
+  end function to_string_day_of_year
 !=========================================================================================
 
 
 !=========================================================================================
 !  to_string_hour:
 !
-!    Converts the month number to a string, either a numeric representation if N <= 2
-!    or a character representation if N > 2.
+!    Converts the hour number to a string.
 !
   function to_string_hour( hour, n ) result( str )
     integer(IK) , intent(in)  :: hour
@@ -798,9 +859,9 @@ contains
     character(len=10) :: fmt
     integer(IK)       :: str_len
 
+    write(fmt,'("(I"I0"."I0")")') w, m
     str_len = max(w, m)
     allocate(character(len=str_len) :: str)
-    write(fmt,'("(I"I0"."I0")")') w, m
     write(str,fmt) i
     str = trim(adjustl(str))
   end function to_string_int
@@ -827,7 +888,7 @@ contains
 !
 !    Converts the minute number to a string.
 !
-  function to_string_minute( minute, n ) result( str )
+  recursive function to_string_minute( minute, n ) result( str )
     integer(IK) , intent(in)  :: minute
     integer(IK) , intent(in)  :: n
     character(:), allocatable :: str
