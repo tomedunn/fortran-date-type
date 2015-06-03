@@ -751,7 +751,13 @@ contains
 !=========================================================================================
 !  to_string_date:
 !
-!    Returns .TRUE. if the year for this type(date) is a leap year.
+!    Returns .TRUE. if the year for this type(date) is a leap year. The
+!    formatting used to convert the date to a string should follow the
+!    SimpleDateFormat found at
+!    https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html.
+!    Not all formatting options are implimented yet. There also seems to be a
+!    compiler bug for GFortran where single digit formats such as "M" give zero
+!    length results.
 !
   function to_string_date( self, fmt ) result( str )
     class(date) , intent(in) :: self
