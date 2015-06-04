@@ -7,11 +7,6 @@ program main
   logical, allocatable :: results(:)
   integer :: i
 
-  write(*,'("function dayOfWeek:")')
-  call TEST_dayOfWeek(results)
-  write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
-  if (count(results) /= size(results)) call print_failed_tests(results)
-
   write(*,'("function isLeapYear:")')
   call TEST_isLeapYear(results)
   write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
@@ -27,25 +22,17 @@ program main
   write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
   if (count(results) /= size(results)) call print_failed_tests(results)
 
+  write(*,'("subroutine setDayOfWeek:")')
+  call TEST_setDayOfWeek(results)
+  write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
+  if (count(results) /= size(results)) call print_failed_tests(results)
+
+  write(*,'("subroutine setMonth:")')
+  call TEST_setMonth(results)
+  write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
+  if (count(results) /= size(results)) call print_failed_tests(results)
+
 contains
-
-
-!=========================================================================================
-! TEST_dayOfWeek:
-!
-  subroutine TEST_dayOfWeek( results )
-    logical, allocatable, intent(out) :: results(:)
-    ! local parameters:
-    integer, parameter :: N_TESTS = 1
-    ! local variables:
-    type(date) :: d
-
-    allocate(results(N_TESTS))
-
-    d = date(2015, 6, 3, 8, 0, 0, 0)
-    results(1) = 3 == d%dayOfWeek()
-  end subroutine TEST_dayOfWeek
-!=========================================================================================
 
 
 !=========================================================================================
@@ -66,6 +53,78 @@ contains
     call d%setYear(2001)
     results(2) = .not.d%isLeapYear()
   end subroutine TEST_isLeapYear
+!=========================================================================================
+
+
+!=========================================================================================
+! TEST_setDayOfWeek:
+!
+  subroutine TEST_setDayOfWeek( results )
+    logical, allocatable, intent(out) :: results(:)
+    ! local parameters:
+    integer, parameter :: N_TESTS = 7
+    ! local variables:
+    type(date) :: d
+
+    allocate(results(N_TESTS))
+
+    d = date(2015, 6, 1, 8, 0, 0, 0)
+    call d%setDayOfWeek('Sunday')
+    results(1) = 1 == d%dayOfWeek()
+    call d%setDayOfWeek('Monday')
+    results(2) = 2 == d%dayOfWeek()
+    call d%setDayOfWeek('Tuesday')
+    results(3) = 3 == d%dayOfWeek()
+    call d%setDayOfWeek('Wednesday')
+    results(4) = 4 == d%dayOfWeek()
+    call d%setDayOfWeek('Thursday')
+    results(5) = 5 == d%dayOfWeek()
+    call d%setDayOfWeek('Friday')
+    results(6) = 6 == d%dayOfWeek()
+    call d%setDayOfWeek('Saturday')
+    results(7) = 7 == d%dayOfWeek()
+  end subroutine TEST_setDayOfWeek
+!=========================================================================================
+
+
+!=========================================================================================
+! TEST_setMonth:
+!
+  subroutine TEST_setMonth( results )
+    logical, allocatable, intent(out) :: results(:)
+    ! local parameters:
+    integer, parameter :: N_TESTS = 12
+    ! local variables:
+    type(date) :: d
+
+    allocate(results(N_TESTS))
+
+    d = date(2015, 1, 1, 1, 0, 0, 0)
+    call d%setMonth('January')
+    results(01) = 01 == d%month()
+    call d%setMonth('February')
+    results(02) = 02 == d%month()
+    call d%setMonth('March')
+    results(03) = 03 == d%month()
+    call d%setMonth('April')
+    results(04) = 04 == d%month()
+    call d%setMonth('May')
+    results(05) = 05 == d%month()
+    call d%setMonth('June')
+    results(06) = 06 == d%month()
+    call d%setMonth('July')
+    results(07) = 07 == d%month()
+    call d%setMonth('August')
+    results(08) = 08 == d%month()
+    call d%setMonth('September')
+    results(09) = 09 == d%month()
+    call d%setMonth('October')
+    results(10) = 10 == d%month()
+    call d%setMonth('November')
+    results(11) = 11 == d%month()
+    call d%setMonth('December')
+    results(12) = 12 == d%month()
+  end subroutine TEST_setMonth
 !=========================================================================================
 
 

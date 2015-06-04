@@ -16,10 +16,13 @@ module date_type
   integer, parameter :: LK = 4
   integer, parameter :: IK = 4
   integer, parameter :: RK = 8
-  character(*), parameter :: MONTH_NAMES(*) = ['January  ','February ','March    ', &
-           'April    ','May      ','June     ','July     ','August   ','September', &
-           'October  ','Noveber  ','December ']
-  integer(IK), parameter :: MONTH_NAME_LENS(*) = [7,8,5,5,3,4,4,6,9,7,7,8]
+  integer, parameter :: CK = selected_char_kind('DEFAULT')
+  character(*), parameter :: MONTH_NAMES(12) = ['January  ','February ','March    ', &
+            'April    ','May      ','June     ','July     ','August   ','September', &
+            'October  ','Noveber  ','December ']
+  character(*), parameter :: WEEK_DAY_NAMES(7) = ['Sunday   ', 'Monday   ', 'Tuesday  ', &
+            'Wednesday', 'Thursday ', 'Friday   ', 'Saturday ']
+  integer(IK), parameter :: MONTH_NAME_LENS(12) = [7,8,5,5,3,4,4,6,9,7,7,8]
   integer(IK), parameter :: DAYS_TO_MONTH_REGULAR(12) = [0,31,59,90,120,151,181,212,243,273,304,334]
   integer(IK), parameter :: DAYS_TO_MONTH_LEAP_YEAR(12) = [0,31,60,91,121,152,182,213,244,274,305,335]
 
@@ -56,12 +59,16 @@ module date_type
     procedure :: getYear => date_get_year
     ! set subroutines:
     procedure :: setDayOfMonth => date_set_day_of_month
-    !procedure :: setDayOfWeek => date_set_day_of_week
+    procedure :: setDayOfWeekName => date_set_day_of_week_str
+    procedure :: setDayOfWeekNumber => date_set_day_of_week_int
+    generic :: setDayOfWeek => setDayOfWeekName, setDayOfWeekNumber
     procedure :: setDayOfYear => date_set_day_of_year
     procedure :: setHour => date_set_hour
     procedure :: setMilisecond => date_set_milisecond
     procedure :: setMinute => date_set_minute
-    procedure :: setMonth => date_set_month
+    procedure :: setMonthName => date_set_month_str
+    procedure :: setMonthNumber => date_set_month_int
+    generic :: setMonth => setMonthName, setMonthNumber
     procedure :: setYear => date_set_year
     ! other:
     procedure :: isLeapYear => date_is_leap_year
@@ -389,15 +396,57 @@ contains
 !=========================================================================================
 !  date_set_day_of_month:
 !
-!    Sets the day for this type(date) to the given day.
+!    Sets the day of the month for this type(date) to the given day.
 !
   pure subroutine date_set_day_of_month( self, day )
     class(date), intent(inout) :: self
     integer(IK), intent(in)    :: day
 
-    self%day_of_month_ = day
-    self%day_of_year_ = days_to_month(self%month_, self%year_) + day
+    call self%setDayOfYear(days_to_month(self%month_, self%year_) + day)
   end subroutine date_set_day_of_month
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_set_day_of_week_str:
+!
+!    Sets the day of the week for this type(date) to the given day.
+!
+  pure subroutine date_set_day_of_week_str( self, day )
+    class(date) , intent(inout) :: self
+    character(*), intent(in)    :: day
+
+    select case(str_lowercase(day))
+    case('sunday')
+      call self%setDayOfWeek(1)
+    case('monday')
+      call self%setDayOfWeek(2)
+    case('tuesday')
+      call self%setDayOfWeek(3)
+    case('wednesday')
+      call self%setDayOfWeek(4)
+    case('thursday')
+      call self%setDayOfWeek(5)
+    case('friday')
+      call self%setDayOfWeek(6)
+    case('saturday')
+      call self%setDayOfWeek(7)
+    end select
+  end subroutine date_set_day_of_week_str
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_set_day_of_week_int:
+!
+!    Sets the day for this type(date) to the given day.
+!
+  pure subroutine date_set_day_of_week_int( self, day )
+    class(date), intent(inout) :: self
+    integer(IK), intent(in)    :: day
+
+    call self%setDayOfYear(self%day_of_year_ + day - self%day_of_week_)
+  end subroutine date_set_day_of_week_int
 !=========================================================================================
 
 
@@ -414,6 +463,7 @@ contains
     self%month_ = convert_day_of_year_to_month(day, self%year_)
     self%day_of_month_ = convert_day_of_year_to_day_of_month(self%day_of_year_, &
       self%month_, self%year_)
+    self%day_of_week_  = day_of_week(self%year_, self%month_, self%day_of_month_)
   end subroutine date_set_day_of_year
 !=========================================================================================
 
@@ -461,17 +511,55 @@ contains
 
 
 !=========================================================================================
-!  date_set_month:
+!  date_set_month_int:
 !
 !    Sets the month for this type(date) to the given month.
 !
-  pure subroutine date_set_month( self, month )
+  pure subroutine date_set_month_int( self, month )
     class(date), intent(inout) :: self
     integer(IK), intent(in)    :: month
 
-    self%month_ = month
-    self%day_of_year_ = days_to_month(self%month_, self%year_) + self%day_of_month_
-  end subroutine date_set_month
+    call self%setDayOfYear(days_to_month(month, self%year_) + self%day_of_month_)
+  end subroutine date_set_month_int
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_set_month_str:
+!
+!    Sets the month for this type(date) to the given month.
+!
+  pure subroutine date_set_month_str( self, month )
+    class(date), intent(inout) :: self
+    character(*), intent(in)   :: month
+
+    select case(str_lowercase(month))
+    case('january')
+      call self%setMonth(01)
+    case('february')
+      call self%setMonth(02)
+    case('march')
+      call self%setMonth(03)
+    case('april')
+      call self%setMonth(04)
+    case('may')
+      call self%setMonth(05)
+    case('june')
+      call self%setMonth(06)
+    case('july')
+      call self%setMonth(07)
+    case('august')
+      call self%setMonth(08)
+    case('september')
+      call self%setMonth(09)
+    case('october')
+      call self%setMonth(10)
+    case('november')
+      call self%setMonth(11)
+    case('december')
+      call self%setMonth(12)
+    end select
+  end subroutine date_set_month_str
 !=========================================================================================
 
 
@@ -574,6 +662,7 @@ contains
         if (day < DAYS_TO_MONTH_REGULAR(month)) exit
       end do
     end if
+    month = month - 1
   end function convert_day_of_year_to_month
 !=========================================================================================
 
@@ -604,6 +693,7 @@ contains
       month_number = MONTH_NUMBER_REGULAR(month)
     end if
     day = mod(day_of_month + month_number + year_number + year_number/4 + century, 7)
+    if (day == 0) day = 7
   end function day_of_week
 !=========================================================================================
 
@@ -745,6 +835,29 @@ contains
     seconds = 60*minutes + date2%second_ - date1%second_
     seconds = seconds + 0.001*(date2%milisecond_ - date1%milisecond_)
   end function seconds_between_dates
+!=========================================================================================
+
+
+!=========================================================================================
+! str_lowercase:
+!
+!   Returns given string with all characters A-Z converted to lower case.
+!
+  pure function str_lowercase( str ) result( lstr )
+    character(*), intent(in) :: str
+    character(:), allocatable :: lstr
+    ! local variables:
+    character(1) :: ch
+    integer :: i, ic
+
+    lstr = str
+    do i = 1, len_trim(str)
+      ch = lstr(i:i)
+      ic = ichar(ch)
+      if (64 < ic .and. ic < 91) ch = char(ic + 32)
+      lstr(i:i) = ch
+    end do
+  end function str_lowercase
 !=========================================================================================
 
 
