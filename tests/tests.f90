@@ -128,7 +128,7 @@ contains
 
     allocate(results(N_TESTS))
 
-    d = date(2015, 6, 1, 8, 0, 0, 0)
+    d = date(2015, 6, 07, 8, 0, 0, 0)
     call d%setDayOfWeek(1)
     call d%getDayOfWeek(day_name)
     results(1) = day_name == 'Sunday'

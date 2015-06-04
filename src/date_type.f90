@@ -725,7 +725,7 @@ contains
       month_number = MONTH_NUMBER_REGULAR(month)
     end if
     day = mod(day_of_month + month_number + year_number + year_number/4 + century, 7)
-    if (day == 0) day = 7
+    day = day + 1
   end function day_of_week
 !=========================================================================================
 
