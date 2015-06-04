@@ -19,7 +19,7 @@ module date_type
   integer, parameter :: CK = selected_char_kind('DEFAULT')
   character(*), parameter :: MONTH_NAMES(12) = ['January  ','February ','March    ', &
             'April    ','May      ','June     ','July     ','August   ','September', &
-            'October  ','Noveber  ','December ']
+            'October  ','November ','December ']
   character(*), parameter :: WEEK_DAY_NAMES(7) = ['Sunday   ', 'Monday   ', 'Tuesday  ', &
             'Wednesday', 'Thursday ', 'Friday   ', 'Saturday ']
   integer(IK), parameter :: MONTH_NAME_LENS(12) = [7,8,5,5,3,4,4,6,9,7,7,8]
@@ -50,12 +50,16 @@ module date_type
     procedure :: year => date_return_year
     ! get subroutines:
     procedure :: getDayOfMonth => date_get_day_of_month
-    procedure :: getDayOfWeek => date_get_day_of_week
+    procedure :: getDayOfWeekName => date_get_day_of_week_str
+    procedure :: getDayOfWeekNumber => date_get_day_of_week_int
+    generic :: getDayOfWeek => getDayOfWeekName, getDayOfWeekNumber
     procedure :: getDayOfYear => date_get_day_of_year
     procedure :: getHour => date_get_hour
     procedure :: getMilisecond => date_get_milisecond
     procedure :: getMinute => date_get_minute
-    procedure :: getMonth => date_get_month
+    procedure :: getMonthName => date_get_month_str
+    procedure :: getMonthNumber => date_get_month_int
+    generic :: getMonth => getMonthName, getMonthNumber
     procedure :: getYear => date_get_year
     ! set subroutines:
     procedure :: setDayOfMonth => date_set_day_of_month
@@ -154,16 +158,30 @@ contains
 
 
 !=========================================================================================
-!  date_get_day_of_week:
+!  date_get_day_of_week_int:
 !
 !    Gets the day of the week for this type(date).
 !
-  pure subroutine date_get_day_of_week( self, day )
+  pure subroutine date_get_day_of_week_int( self, day )
     class(date), intent(in)  :: self
     integer(IK), intent(out) :: day
 
     day = self%day_of_week_
-  end subroutine date_get_day_of_week
+  end subroutine date_get_day_of_week_int
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_get_day_of_week_str:
+!
+!    Gets the day of the week for this type(date).
+!
+  pure subroutine date_get_day_of_week_str( self, day )
+    class(date) , intent(in)  :: self
+    character(*), intent(out) :: day
+
+    day = WEEK_DAY_NAMES(self%day_of_week_)
+  end subroutine date_get_day_of_week_str
 !=========================================================================================
 
 
@@ -224,16 +242,30 @@ contains
 
 
 !=========================================================================================
-!  date_get_month:
+!  date_get_month_int:
 !
 !    Gets the month for this type(date).
 !
-  pure subroutine date_get_month( self, month )
+  pure subroutine date_get_month_int( self, month )
     class(date), intent(in)  :: self
     integer(IK), intent(out) :: month
 
     month = self%month_
-  end subroutine date_get_month
+  end subroutine date_get_month_int
+!=========================================================================================
+
+
+!=========================================================================================
+!  date_get_month_str:
+!
+!    Gets the month name for this type(date).
+!
+  pure subroutine date_get_month_str( self, month )
+    class(date) , intent(in)  :: self
+    character(*), intent(out) :: month
+
+    month = MONTH_NAMES(self%month_)
+  end subroutine date_get_month_str
 !=========================================================================================
 
 
