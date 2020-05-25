@@ -174,7 +174,7 @@ contains
 !=========================================================================================
 !  date_get_day_of_week_str:
 !
-!    Gets the day of the week for this type(date).
+!    Gets the day of the week name for this type(date).
 !
   pure subroutine date_get_day_of_week_str( self, day )
     class(date) , intent(in)  :: self
@@ -442,7 +442,7 @@ contains
 !=========================================================================================
 !  date_set_day_of_week_str:
 !
-!    Sets the day of the week for this type(date) to the given day.
+!    Sets the day of the week for this type(date) to the given day of the week.
 !
   pure subroutine date_set_day_of_week_str( self, day )
     class(date) , intent(inout) :: self
@@ -471,7 +471,7 @@ contains
 !=========================================================================================
 !  date_set_day_of_week_int:
 !
-!    Sets the day for this type(date) to the given day.
+!    Sets the day for this type(date) to the given day of the week.
 !
   pure subroutine date_set_day_of_week_int( self, day )
     class(date), intent(inout) :: self
@@ -485,7 +485,7 @@ contains
 !=========================================================================================
 !  date_set_day_of_year:
 !
-!    Sets the day for this type(date) to the given day.
+!    Sets the day for this type(date) to the given day of the year.
 !
   pure subroutine date_set_day_of_year( self, day )
     class(date), intent(inout) :: self
@@ -545,7 +545,8 @@ contains
 !=========================================================================================
 !  date_set_month_int:
 !
-!    Sets the month for this type(date) to the given month.
+!    Sets the month for this type(date) to the given month while keeping the day of the
+!    month the same.
 !
   pure subroutine date_set_month_int( self, month )
     class(date), intent(inout) :: self
@@ -559,7 +560,8 @@ contains
 !=========================================================================================
 !  date_set_month_str:
 !
-!    Sets the month for this type(date) to the given month.
+!    Sets the month for this type(date) to the given month while keeping the day of the
+!    month the same.
 !
   pure subroutine date_set_month_str( self, month )
     class(date), intent(inout) :: self
@@ -598,7 +600,8 @@ contains
 !=========================================================================================
 !  date_set_year:
 !
-!    Sets the year for this type(date) to the given year.
+!    Sets the year for this type(date) to the given year while keeping the month and day
+!    of the month the same.
 !
   pure subroutine date_set_year( self, year )
     class(date), intent(inout) :: self
@@ -613,7 +616,7 @@ contains
 !=========================================================================================
 !  date_time_from:
 !
-!    Returns .TRUE. if the year for this type(date) is a leap year.
+!    Returns the number of seconds from the given type(date) to this type(date).
 !
   pure function date_time_from( self, date1 ) result( val )
     class(date), intent(in) :: self
@@ -628,7 +631,7 @@ contains
 !=========================================================================================
 !  date_time_to:
 !
-!    Returns .TRUE. if the year for this type(date) is a leap year.
+!    Returns the number of seconds from this type(date) to the given type(date).
 !
   pure function date_time_to( self, date2 ) result( val )
     class(date), intent(in) :: self
@@ -662,7 +665,7 @@ contains
 !=========================================================================================
 !  convert_day_of_year_to_day_of_month:
 !
-!    Returns the number of the month the given day of year belongs to.
+!    Returns the day of the month for the given day of the year, month, and year.
 !
   elemental function convert_day_of_year_to_day_of_month( day, month, year ) result( DOM )
     integer(IK), intent(in) :: day
@@ -836,8 +839,7 @@ contains
 !=========================================================================================
 !  next_leap_year:
 !
-!    Returns the leap year closest, either during or after the current leap
-!    year.
+!    Returns the leap year closest, either during or after the current leap year.
 !
   elemental function next_leap_year( year ) result( ans )
     integer(IK), intent(in) :: year
