@@ -762,7 +762,7 @@ contains
     integer(IK), intent(in) :: second_year
     integer(IK) :: days
     ! local variables:
-    integer(IK) :: nly, y1, y2
+    integer(IK) :: i, nly, y1, y2
     integer(IK) :: leap_years
 
     ! calculate days (not including leap years
@@ -772,7 +772,9 @@ contains
 
     ! account for leap years
     nly = next_leap_year(y1)
-    if (nly < y2) days = days + (y2 - nly - 1)/4 + 1
+    if (nly < y2) then
+      days = days + count(is_leap_year([(i, i=nly, y2, 4)]))
+    end if
 
     ! apply sign if second_year comes before first_year
     if (first_year > second_year) days = -days
@@ -831,7 +833,19 @@ contains
     integer(IK), intent(in) :: year
     logical(LK) :: ans
 
-    ans = 0 == mod(year, 4)
+    if (0 == mod(year, 4)) then
+      if (0 == mod(year, 100)) then
+        if (0 == mod(year, 400)) then
+          ans = .true.
+        else
+          ans = .false.
+        end if
+      else
+        ans = .true.
+      end if
+    else
+      ans = .false.
+    end if
   end function is_leap_year
 !=========================================================================================
 
@@ -839,7 +853,7 @@ contains
 !=========================================================================================
 !  next_leap_year:
 !
-!    Returns the leap year closest, either during or after the current leap year.
+!    Returns the leap year closest, either during or after the given year.
 !
   elemental function next_leap_year( year ) result( ans )
     integer(IK), intent(in) :: year
@@ -847,6 +861,7 @@ contains
 
     ans = 4*(year/4)
     if (ans < year) ans = year + 4
+    if (.not.is_leap_year(ans)) ans = ans + 4
   end function next_leap_year
 !=========================================================================================
 

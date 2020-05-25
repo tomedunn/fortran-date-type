@@ -50,7 +50,7 @@ contains
   subroutine TEST_isLeapYear( results )
     logical, allocatable, intent(out) :: results(:)
     ! local parameters:
-    integer, parameter :: N_TESTS = 2
+    integer, parameter :: N_TESTS = 3
     ! local variables:
     type(date) :: d
 
@@ -61,6 +61,8 @@ contains
     results(1) = d%isLeapYear()
     call d%setYear(2001)
     results(2) = .not.d%isLeapYear()
+    call d%setYear(2100)
+    results(3) = .not.d%isLeapYear()
   end subroutine TEST_isLeapYear
 !=========================================================================================
 
@@ -71,18 +73,18 @@ contains
   subroutine TEST_timeFrom( results )
     logical, allocatable, intent(out) :: results(:)
     ! local parameters:
-    integer, parameter :: N_TESTS = 2
+    integer, parameter :: N_TESTS = 3
     ! local variables:
-    type(date) :: d1, d2
+    type(date) :: d1, d2, d3
 
     allocate(results(N_TESTS))
 
-    d1 = now()
-    call d1%setYear(2000)
-    d2 = d1
-    call d2%setYear(2001)
-    results(1) =  d2%timeFrom(d1) == real(365*24*60*60, 8)
-    results(2) = -d1%timeFrom(d2) == real(365*24*60*60, 8)
+    d1 = date(2000, 1, 1, 0, 0, 0, 0)
+    d2 = date(2001, 1, 1, 0, 0, 0, 0)
+    d3 = date(2002, 1, 1, 0, 0, 0, 0)
+    results(1) =  d2%timeFrom(d1) == real(366*24*60*60, 8)
+    results(2) = -d1%timeFrom(d2) == real(366*24*60*60, 8)
+    results(3) =  d3%timeFrom(d1) == real((366+365)*24*60*60, 8)
   end subroutine TEST_timeFrom
 !=========================================================================================
 
